@@ -21,7 +21,10 @@ do
 
     echo "$instance instance ID: $instance_id"
 
-    if [ $instance != "frontend" ]; then
+    sleep 10
+
+ 
+  if [ "$instance" != "frontend" ]; then
         IP=$( aws ec2 describe-instances --instance-ids $instance_id \
              --query 'Reservations[].Instances[].PrivateIpAddress' --output text
         )
@@ -45,10 +48,14 @@ do
                         "Name": "'"$r53_record"'",
                         "Type": "A",
                         "TTL": 1,
-                        "ResourceRecords": [{"Value": \"$IP\"}]
+                        "ResourceRecords": [{"Value": "'"$IP"'"}]
                     }
                 }
             ]
         }'
-    echo "Updated R53 record for $instance"
+    if [ $? -eq 0 ]; then
+        echo "Updated R53 record for $instance"
+    else
+        echo "Failed to update R53 record for $instance"
+    fi 
 done
