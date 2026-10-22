@@ -17,7 +17,7 @@ mkdir -p $logs_folder
 
 echo "Script started evecution at $(date +%F_%T)" &>> $logs_file
 
-timestamp=$(){
+timestamp() {
     date +%F_%T
 }
 
