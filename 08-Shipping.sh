@@ -34,53 +34,9 @@ validate() {
 }
 echo "$(timestamp) [INFO]====Script started execution===="| tee -a $logs_file
 
-dnf module disable nodejs -y &>> $logs_file
-dnf module enable nodejs:24 -y &>> $logs_file
-dnf install nodejs -y &>> $logs_file
-validate $? "Installing nodejs 24"
-
-id roboshop &>> "$logs_file"
-if [ $? -ne 0 ]; then
-    useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop
-    validate $? "Creating system user"
-else
-    echo -e "System user roboshop already exists....${Y}SKIPPING${N}" | tee -a "$logs_file"
-fi
-
-rm -rf /app
-validate $? "removing old code"
-
-mkdir -p /app
-validate $? "Creating app directory"
-
-curl -L -o /tmp/cart.zip https://raw.githubusercontent.com/daws-92s/roboshop-documentation/refs/heads/main/artifacts/cart-v4.zip
-validate $? "Downloading cart"
-
-cd /app
-unzip /tmp/cart.zip &>> $logs_file
-validate $? "unzipping cart"
-
-npm install &>> $logs_file
-validate $? "Installing dependencies"
-
-sed -i "s/DOMAIN_NAME/$domain_name/g" "$scripts_dir/cart.service"
-validate $? "Updating cart service"
-
-cp "$scripts_dir/cart.service" /etc/systemd/system/cart.service
-validate $? "Copying cart service"
-
-systemctl daemon-reload
-validate $? "Reloading systemd"
-
-systemctl enable cart &>> "$logs_file"
-validate $? "Enabling cart"
-
-systemctl start cart &>> "$logs_file"
-validate $? "Starting cart"
-
-
-systemctl restart cart
-validate $? "Restarting cart"
+dnf module enable maven:3.9 -y &>> $logs_file
+dnf install maven java-25-openjdk-devel -y &>> $logs_file
+validate $? "Installing Java and Maven"
 
 echo "$(timestamp) [INFO] Script completed in $SECONDS seconds" | tee -a $logs_file
 echo "$(timestamp) [INFO] ====Script completed execution====" | tee -a $logs_file
