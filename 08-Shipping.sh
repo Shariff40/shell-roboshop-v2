@@ -38,5 +38,64 @@ dnf module enable maven:3.9 -y &>> $logs_file
 dnf install maven java-25-openjdk-devel -y &>> $logs_file
 validate $? "Installing Java and Maven"
 
+alternatives --set java "/usr/lib/jvm/java-25-openjdk/bin/java"
+validate $? "setting Java 25 as default Java verion"
+
+echo "export JAVA_HOME=$(dirname $(dirname $(readlink -f /usr/bin/java)))" > /etc/profile.d/java.sh
+source /etc/profile.d/java.sh
+echo $JAVA_HOME
+validate $? "setting JAVA_HOME for maven"
+
+id roboshop &>> "$logs_file"
+if [ $? -ne 0 ]; then
+    useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop
+    validate $? "Creating system user"
+else
+    echo -e "System user roboshop already exists....${Y}SKIPPING${N}" | tee -a "$logs_file"
+fi
+
+rm -rf /app
+validate $? "removing old code"
+
+mkdir -p /app
+validate $? "Creating app directory"
+
+curl -L -o /tmp/shipping.zip https://raw.githubusercontent.com/daws-92s/roboshop-documentation/refs/heads/main/artifacts/shipping-v4.zip
+validate $? "Downloading shipping"
+
+cd /app
+unzip /tmp/shipping.zip &>> $logs_file
+validate $? "unzipping shipping"
+
+nmvn clean package &>> $logs_file
+validate $? "Installing dependencies"
+
+mv target/shipping.jar shipping.jar
+validate $?"Moving shipping.jar file"
+
+sed -i "s/DOMAIN_NAME/$domain_name/g" "$scripts_dir/shipping.service"
+validate $? "Updating shipping service"
+
+cp "$scripts_dir/shipping.service" /etc/systemd/system/shipping.service
+validate $? "Copying shipping service"
+
+dnf install mysql -y &>> $logs_file
+validate $? "Installing MySQL client"
+
+
+
+systemctl daemon-reload
+validate $? "Reloading systemd"
+
+systemctl enable shipping &>> "$logs_file"
+validate $? "Enabling shipping"
+
+systemctl start shipping &>> "$logs_file"
+validate $? "Starting shipping"
+
+
+systemctl restart shipping
+validate $? "Restarting shipping"
+
 echo "$(timestamp) [INFO] Script completed in $SECONDS seconds" | tee -a $logs_file
 echo "$(timestamp) [INFO] ====Script completed execution====" | tee -a $logs_file
