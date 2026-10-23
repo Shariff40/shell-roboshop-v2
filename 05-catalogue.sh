@@ -3,7 +3,7 @@
 user_id=$(id -u)
 logs_folder="/var/log/roboshop"
 logs_file="${logs_folder}/${0}.log"
-domain-name="shariffdevops.online"
+domain_name="shariffdevops.online"
 scripts_dir=$(dirname "$(realpath "$0")")
 R="\e[31m"
 G="\e[32m"
@@ -63,25 +63,28 @@ validate $? "unzipping catalogue"
 npm install &>> $logs_file
 validate $? "Installing dependencies"
 
-sed -i "s/DOMAIN_NAME/$doamin_name/g" "$script_dir/catalogue.service"
-cp "$script_dir/catalogue.service" /etc/systemd/system/catalogue.service
+sed -i "s/DOMAIN_NAME/$domain_name/g" "$scripts_dir/catalogue.service"
+validate $? "Updating catalogue service"
+
+cp "$scripts_dir/catalogue.service" /etc/systemd/system/catalogue.service
+validate $? "Copying catalogue service"
 
 systemctl daemon-reload 
 systemctl enable catalogue &>> $logs_file
 systemctl start catalogue &>> $logs_file
 valiadate $? "starting and enabling catalogue"
 
-cp "$script_dir/mongo.repo" /etc/yum.repos.d.mongo.repo
-validate $? "adding mongo repo"
+cp "$scripts_dir/mongo.repo" /etc/yum.repos.d/mongo.repo
+validate $? "Adding mongo repo"
 
 dnf install mongodb-mongosh -y &>> $logs_file
 validate $? "installing MongoDB Client"
 
 
-product_count=$(mongosh --host "mongodb.$domain_name" --quiet --eval 'db.getSiblingDB("catalogue").products.countDocuments()') &>> $logs_file
-validate $? "connecting to mongoDB"
+product_count=$(mongosh --host "mongodb.$domain_name" --quiet --eval 'db.getSiblingDB("catalogue").products.countDocuments()' 2>> "$logs_file")
+validate $? "Connecting to MongoDB"
 
-if ["$product_count" -eq 0 ] ; then 
+if [ "$product_count" -eq 0 ]; then
 mongosh --host "mongodb.$domain_name" </app/db/master-data.js &>> $logs_file
 validate $? "Loading products"
 else
