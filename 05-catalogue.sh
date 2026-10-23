@@ -69,10 +69,14 @@ validate $? "Updating catalogue service"
 cp "$scripts_dir/catalogue.service" /etc/systemd/system/catalogue.service
 validate $? "Copying catalogue service"
 
-systemctl daemon-reload 
-systemctl enable catalogue &>> $logs_file
-systemctl start catalogue &>> $logs_file
-valiadate $? "starting and enabling catalogue"
+systemctl daemon-reload
+validate $? "Reloading systemd"
+
+systemctl enable catalogue &>> "$logs_file"
+validate $? "Enabling catalogue"
+
+systemctl start catalogue &>> "$logs_file"
+validate $? "Starting catalogue"
 
 cp "$scripts_dir/mongo.repo" /etc/yum.repos.d/mongo.repo
 validate $? "Adding mongo repo"
