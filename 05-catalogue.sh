@@ -37,14 +37,13 @@ dnf module enable nodejs:24 -y &>> $logs_file
 dnf install nodejs -y &>> $logs_file
 validate $? "Installing nodejs 24"
 
-id roboshop &>> $logs_file
+id roboshop &>> "$logs_file"
 if [ $? -ne 0 ]; then
-useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop
-validate $? "creating system user"
-
-else 
-echo -e "system user roboshop already exist....${Y}SKIPPING{N}
+    useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop
+    validate $? "Creating system user"
 else
+    echo -e "System user roboshop already exists....${Y}SKIPPING${N}" | tee -a "$logs_file"
+fi
 
-echo "$(timestamp) [INFO] Srcipt completed in $SECONDS seconds"
-echo "$(timestamp) [INFO]====Script completed execution===="| tee -a $logs_file
+echo "$(timestamp) [INFO] Script completed in $SECONDS seconds" | tee -a $logs_file
+echo "$(timestamp) [INFO] ====Script completed execution====" | tee -a $logs_file
