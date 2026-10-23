@@ -25,7 +25,7 @@ timestamp() {
 
 
 validate() {
-    if [ $1 -ne 0 ]; then
+    if [ "$1" -ne 0 ]; then
         echo -e "$(timestamp) [ERROR] ${2}.. ${R}FAILED${N}" | tee -a $logs_file
         exit 1
     else
@@ -82,7 +82,7 @@ validate $? "Copying shipping service"
 dnf install mysql -y &>> $logs_file
 validate $? "Installing MySQL client"
 
-mysql -h "mysql.DOMAIN_NAME" -uroot -pRoboShop@1 < /app/db/master-data.sql
+mysql -h "mysql.$domain_name" -uroot -pRoboShop@1 < /app/db/master-data.sql
 validate $? "Loading shipping data"
 
 systemctl daemon-reload
