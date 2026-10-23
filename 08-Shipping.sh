@@ -67,7 +67,7 @@ cd /app
 unzip /tmp/shipping.zip &>> $logs_file
 validate $? "unzipping shipping"
 
-nmvn clean package &>> $logs_file
+mvn clean package &>> $logs_file
 validate $? "Installing dependencies"
 
 mv target/shipping.jar shipping.jar
