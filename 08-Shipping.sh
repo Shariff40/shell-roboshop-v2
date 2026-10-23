@@ -82,7 +82,7 @@ validate $? "Copying shipping service"
 dnf install mysql -y &>> $logs_file
 validate $? "Installing MySQL client"
 
-mysql -h "mysql.shariffdevops.online" -uroot -pRoboShop@1 < /app/db/master-data.sql
+mysql -h "mysql.DOMAIN_NAME" -uroot -pRoboShop@1 < /app/db/master-data.sql
 validate $? "Loading shipping data"
 
 systemctl daemon-reload
