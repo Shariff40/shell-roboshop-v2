@@ -60,15 +60,15 @@ cd /app
 python3.14 -m venv /app/.venv
 validate $? "creating virtual environment"
 
-/app/.venv/bin/pip install -r requirements.txt
+/app/.venv/bin/pip install -r requirements.txt &>> $logs_file
 validate $? "installing dependencies"
 
 sed -i "s/DOMAIN_NAME/$domain_name/g" "$scripts_dir/payment.service"
 cp "$scripts_dir/payment.service" /etc/systemd/system/payment.service
 
-systemctl daemon-reload
-systemctl enable payment
-systemctl start payment
+systemctl daemon-reload &>> $logs_file
+systemctl enable payment &>> $logs_file
+systemctl start payment &>> $logs_file
 validate $? "Starting/restarting payment"
 
 
